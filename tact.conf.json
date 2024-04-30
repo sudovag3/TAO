@@ -1,0 +1,21 @@
+{
+    "projects": [
+        {
+          "name": "BatchSender",
+          "path": "./contracts/batch_sender.tact",
+          "output": "./build/BatchSender",
+
+          "options": {
+            "debug": true
+          }
+        },
+        {
+          "name": "Jetton",
+          "path": "./contracts/jetton.tact",
+          "output": "./build/Jetton",
+          "options": {
+            "debug": true
+          }
+        }
+      ]
+}

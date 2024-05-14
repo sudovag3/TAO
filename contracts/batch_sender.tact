@@ -78,6 +78,10 @@ message TokenSend {
     sendInfo: map<Int, TokenSendInfo>;
 }
 
+message SetSendCost {
+    send_cost: Int;
+}
+
 message Send {
     queryId: Int as uint64;
     length: Int as uint64;
@@ -85,9 +89,6 @@ message Send {
     sendInfo: map<Int, TokenSendInfo>;
     cursor: Int;
 }
-
-
-
 
 
 contract BatchSender with Deployable, Ownable, OwnableTransferable, Stoppable, Resumable {
@@ -140,7 +141,7 @@ contract BatchSender with Deployable, Ownable, OwnableTransferable, Stoppable, R
             send(SendParameters{
                 to: myAddress(),
                 value: 0,
-                mode: SendRemainingBalance,
+                mode: SendRemainingValue,
                 bounce: false,
                 body: msg.toCell()
             });
@@ -176,7 +177,7 @@ contract BatchSender with Deployable, Ownable, OwnableTransferable, Stoppable, R
         // Send tokens
         //TODO Проверка кошелька!!!!!
         // let contentS : Slice = msg.forward_payload.beginParse();
-        msg.forward_payload = msg.forward_payload.loadRef().beginParse();
+        //msg.forward_payload = msg.forward_payload.loadRef().beginParse();
         let meta_data: Slice = msg.forward_payload.loadRef().beginParse();
         // msg.forward_payload.refs() == 0
         // msg.forward_payload.bits() == 1
@@ -263,7 +264,7 @@ contract BatchSender with Deployable, Ownable, OwnableTransferable, Stoppable, R
             SendParameters{
                 to: msg.from,
                 value: 0,
-                mode: SendRemainingBalance + SendIgnoreErrors,
+                mode: SendRemainingValue + SendIgnoreErrors,
                 body: "Finish".asComment()
             }
         );
@@ -271,7 +272,22 @@ contract BatchSender with Deployable, Ownable, OwnableTransferable, Stoppable, R
 
     }
 
+    receive(msg: SetSendCost) {
+        self.requireOwner();
+        self.send_cost = msg.send_cost;
 
+        nativeReserve(
+            MINIMAL_CONTRACT_BALANCE
+        , 0);
+
+        send(SendParameters
+        {
+            to: sender(),
+            value: 0,
+            mode: SendRemainingValue + SendIgnoreErrors,
+            bounce: false
+        });
+    }
 
 
     fun transferJettonTo(jetton_wallet: Address, destination: Address, amount: Int, query_id: Int, message: String) {
@@ -289,6 +305,9 @@ contract BatchSender with Deployable, Ownable, OwnableTransferable, Stoppable, R
         return self.id;
     }
 
+    get fun sendCost(): Int {
+        return self.send_cost;
+    }
     
     get fun buildTokenSendPayload(msg: TokenSend): Cell {
         return beginCell().storeRef(

@@ -16,10 +16,35 @@ import { getHttpEndpoint } from "@orbs-network/ton-access";
 
 const TestParams: [string, number][] = [
   ["UQCxNYjemj5i60KBuuXN71tY_TvrTg7Jpuzxd43_yT5ISALo", 131.0],
+  ["UQAOc2-v70u975bLYuMrU8F5GaU_ZQJtgB-TT7LQbjcy7s1M", 123.0],
+  ["UQCxNYjemj5i60KBuuXN71tY_TvrTg7Jpuzxd43_yT5ISALo", 142.0],
+  ["UQCxNYjemj5i60KBuuXN71tY_TvrTg7Jpuzxd43_yT5ISALo", 124.0],
+  ["UQCxNYjemj5i60KBuuXN71tY_TvrTg7Jpuzxd43_yT5ISALo", 131.0],
   ["UQCxNYjemj5i60KBuuXN71tY_TvrTg7Jpuzxd43_yT5ISALo", 123.0],
   ["UQCxNYjemj5i60KBuuXN71tY_TvrTg7Jpuzxd43_yT5ISALo", 142.0],
-  ["UQCxNYjemj5i60KBuuXN71tY_TvrTg7Jpuzxd43_yT5ISALo", 124.0]
+  ["EQBgmi4dsim7qBiu_6rzPnJaj7s9FlKKYDNkXwaivQmIhhxb", 124.0]
 ]
+
+// function payload_body(tokenRoot: Address, length: bigint, sendInfo: Dictionary<bigint, TokenSendInfo>): Cell {
+//   return beginCell()
+//     //.storeUint(OPS.Mint, 32) // opcode (reference TODO)
+//     .storeRef(
+//       beginCell()
+//       .storeUint(length, 64) // queryid
+//       .storeAddress(tokenRoot)
+//       .endCell()
+      
+//     )
+//     // .storeDict(sendInfo, Dictionary.Keys.BigInt(257), dictValueParserTokenSendInfo())
+//     .storeRef(
+//       // internal transfer message
+//       beginCell()
+//         .storeUint(0,8)
+//         .storeDict(sendInfo, Dictionary.Keys.BigInt(257), dictValueParserTokenSendInfo())
+//         .endCell()
+//     )
+//     .endCell();
+// }
 
 function payload_body(tokenRoot: Address, length: bigint, sendInfo: Dictionary<bigint, TokenSendInfo>): Cell {
   return beginCell()
@@ -41,6 +66,7 @@ function payload_body(tokenRoot: Address, length: bigint, sendInfo: Dictionary<b
     )
     .endCell();
 }
+
 
 function dictValueParserTokenSendInfo(): DictionaryValue<TokenSendInfo> {
   return {
@@ -96,10 +122,10 @@ export async function run(
     }
 
     console.log(`Open contracts....`);
-    
-    const batchSender = provider.open(BatchSender.fromAddress(address("EQCp9JUfe1rLfPZgc0Sj2e0ZaHHYk2nZPNxf-r1bvtZGraP8")));
+    //РАБОЧИЙ
+    //const batchSender = provider.open(BatchSender.fromAddress(address("EQCp9JUfe1rLfPZgc0Sj2e0ZaHHYk2nZPNxf-r1bvtZGraP8")));
     //PROD
-    //const batchSender = provider.open(BatchSender.fromAddress(address("EQAcIyvwcketMGM9VvjRZXSaONeCoOeLrFpf_WE640eORkB1")));
+    const batchSender = provider.open(BatchSender.fromAddress(address("0QCbVMWAMeUXQzW-ANL7X794p8EYcmNedACqXL4bMBSzR7-u")));
     const JettonAddress2 = address("EQCpx8W6yIfsNh_fpUSpPWo-HEcRj06PEjByq3za4QcduFwL")
     const walletAddress = address("0QCItp_BXJSu2m4qgtUcbKy7gTTQ6fIdokNInFoHIBJ2Fjnm")
     const senderWallet = blockchain.openContract(JettonDefaultWallet.fromAddress(walletAddress));
@@ -132,7 +158,7 @@ export async function run(
       destination: batchSender.address,
       response_destination: provider.sender().address!,
       custom_payload: null,
-      forward_ton_amount: toNano("0.09") * BigInt(TestParams.length) + toNano('0.02') + (toNano("0.0086") * BigInt(TestParams.length)),
+      forward_ton_amount: toNano("0.05") * BigInt(TestParams.length) + toNano('0.02') + (toNano("0.0086") * BigInt(TestParams.length)),
       forward_payload: payload,
   };
   const buidler = new Builder()

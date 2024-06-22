@@ -1,12 +1,28 @@
 import "@stdlib/deploy";
 import "@stdlib/ownable";
 
-trait Trackable with Ownable {
 
+message AddToWhiteList {
+    target: Address;
+}
+
+message RemoveFromWhiteList {
+    target: Address;
+}
+
+message SetWhiteListEnable {
+    to: Bool;
+}
+
+const USER_IS_NOT_WHITELISTED: Int = 4000;
+
+
+
+trait WhiteListable with Ownable {
 
     owner: Address;
-    whiteList: map<Address, Bool>;           // your new trait may add state variables but should not specify their size
-
+    whiteList: map<Address, Bool>;
+    whiteListEnable: Bool;
     // Receivers
 
     receive("reset whitelist") {
@@ -15,28 +31,41 @@ trait Trackable with Ownable {
         self.reply("reset done".asComment());
     }
 
+    receive(msg: AddToWhiteList) {
+        self.requireOwner();
+        self.whiteList.set(msg.target, true);
+    }
+
+    receive(msg: RemoveFromWhiteList) {
+        self.requireOwner();
+        self.whiteList.set(msg.target, null);
+    }
+
+    receive(msg: SetWhiteListEnable) {
+        self.requireOwner();
+        self.whiteListEnable = msg.to;
+    }
+
     // Getters
 
-    get fun inWhiteList(target: Address): Bool {              // your new trait may add getters
-        if (self.whiteList.get(target) != null) {
-            return self.whiteList.get(target);
-        }
-        return false;
-    }
-
-    // Methods
-
-    fun receivedNewMessage() {          // your new trait may define new contract methods
-        if (self.filterMessage()) {
-            self.numMessagesReceived = self.numMessagesReceived + 1;
-        }
-    }
-
-    virtual fun filterMessage(): Bool { // virtual functions can be overridden by users of this trait
-        // the default filtering behavior is to ignore messages sent by the owner
-        if (sender() == self.owner) {
+    get fun inWhiteList(target: Address): Bool { 
+        if (self.whiteListEnable == true){
+            if (self.whiteList.get(target) != null) {
+                return self.whiteList.get(target)!!;
+            }
             return false;
+        } else {
+            return true;
         }
-        return true;
+    }
+
+    get fun isWhiteListEnable(): Bool {
+        return self.whiteListEnable;
+    }
+
+    fun requireInWhiteList(target: Address) {
+        if (self.whiteListEnable == true){
+            nativeThrowUnless(USER_IS_NOT_WHITELISTED, self.whiteList.get(target) == true);
+        }
     }
 }

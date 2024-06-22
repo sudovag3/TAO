@@ -151,7 +151,7 @@ export async function run(
   //     }
   // )
 
-    const transferMessage: TokenTransfer = {
+  const transferMessage: TokenTransfer = {
       $$type: "TokenTransfer",
       queryId: 0n,
       amount: toNano(send_sum),

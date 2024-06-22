@@ -2,7 +2,7 @@ import "@stdlib/deploy";
 import "./types.tact";
 import "./vote.tact";
 
-const DEFAULT_REQUEST_PRICE: Int = ton("1");
+const DEFAULT_REQUEST_PRICE: Int = ton("0.1");
 const DEFAULT_TIMEOUT: Int = 60 * 60 * 24; // 24 hours
 const DEFAULT_TIMELOCK: Int = 0; // No timelock
 

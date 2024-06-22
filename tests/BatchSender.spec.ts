@@ -60,233 +60,233 @@ const jettonStableParams = {
 let content = buildOnchainMetadata(jettonParams);
 let max_supply = toNano(1234766689011); // Set the specific total supply in nano
 
-// describe('BatchSender', () => {
+describe('BatchSender', () => {
 
-//     let blockchain: Blockchain;
-//     let deployer: SandboxContract<TreasuryContract>;
-//     let batchSender: SandboxContract<BatchSender>;
-//     //let UniverseSender: SandboxContract<TreasuryContract>;
-//     let token: SandboxContract<SampleJetton>;
-//     let jettonWallet: SandboxContract<JettonDefaultWallet>;
-//     let batchSenderWallet: SandboxContract<JettonDefaultWallet>;
+    let blockchain: Blockchain;
+    let deployer: SandboxContract<TreasuryContract>;
+    let batchSender: SandboxContract<BatchSender>;
+    //let UniverseSender: SandboxContract<TreasuryContract>;
+    let token: SandboxContract<SampleJetton>;
+    let jettonWallet: SandboxContract<JettonDefaultWallet>;
+    let batchSenderWallet: SandboxContract<JettonDefaultWallet>;
 
-//     let code: Cell;
+    let code: Cell;
 
-//     beforeEach(async () => {
-//         blockchain = await Blockchain.create();
-//         blockchain.verbosity = {
-//             print: true,
-//             blockchainLogs: false,
-//             vmLogs: 'none',
-//             debugLogs: true,
-//         }
+    beforeEach(async () => {
+        blockchain = await Blockchain.create();
+        blockchain.verbosity = {
+            print: true,
+            blockchainLogs: false,
+            vmLogs: 'none',
+            debugLogs: true,
+        }
 
-//         deployer = await blockchain.treasury('deployer');
+        deployer = await blockchain.treasury('deployer');
         
-//         // ============================================================ //
-//         // CREATE TEST JETTON
-//         token = blockchain.openContract(await SampleJetton.fromInit(deployer.address, content, max_supply));
+        // ============================================================ //
+        // CREATE TEST JETTON
+        token = blockchain.openContract(await SampleJetton.fromInit(deployer.address, content, max_supply));
 
-//         // Send Transaction
-//         const deployJettonResult = await token.send(deployer.getSender(), { value: toNano("10") }, "Mint: 100");
-//         expect(deployJettonResult.transactions).toHaveTransaction({
-//             from: deployer.address,
-//             to: token.address,
-//             deploy: true,
-//             success: true,
-//         });
+        // Send Transaction
+        const deployJettonResult = await token.send(deployer.getSender(), { value: toNano("10") }, "Mint: 100");
+        expect(deployJettonResult.transactions).toHaveTransaction({
+            from: deployer.address,
+            to: token.address,
+            deploy: true,
+            success: true,
+        });
 
-//         const playerWallet = await token.getGetWalletAddress(deployer.address);
-//         jettonWallet = blockchain.openContract(await JettonDefaultWallet.fromAddress(playerWallet));
-//         // ============================================================ //
-//         // CREATE BACTH SENDER
+        const playerWallet = await token.getGetWalletAddress(deployer.address);
+        jettonWallet = blockchain.openContract(await JettonDefaultWallet.fromAddress(playerWallet));
+        // ============================================================ //
+        // CREATE BACTH SENDER
 
-//         batchSender = blockchain.openContract(await BatchSender.fromInit(0n, toNano(0.09)));
+        batchSender = blockchain.openContract(await BatchSender.fromInit(0n, toNano(0.09)));
        
         
 
-//         const deployResult = await batchSender.send(
-//             deployer.getSender(),
-//             {
-//                 value: toNano('0.05'),
-//             },
-//             {
-//                 $$type: 'Deploy',
-//                 queryId: 0n,
-//             }
-//         );
+        const deployResult = await batchSender.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Deploy',
+                queryId: 0n,
+            }
+        );
 
-//         await blockchain.setVerbosityForAddress(batchSender.address,{
-//             print: true,
-//             blockchainLogs: false,
-//             vmLogs: 'none',
-//             debugLogs: true,
-//         })
+        await blockchain.setVerbosityForAddress(batchSender.address,{
+            print: true,
+            blockchainLogs: false,
+            vmLogs: 'none',
+            debugLogs: true,
+        })
 
-//         expect(deployResult.transactions).toHaveTransaction({
-//             from: deployer.address,
-//             to: batchSender.address,
-//             deploy: true,
-//             success: true,
-//         });
-//         // ============================================================ //
-//         // Deploy Coin on Func
-//         // ============================================================ //
-//         // Create wallet for batch sender
-//         const wallet = await token.getGetWalletAddress(batchSender.address);
-//         batchSenderWallet = blockchain.openContract(await JettonDefaultWallet.fromAddress(wallet));
+        expect(deployResult.transactions).toHaveTransaction({
+            from: deployer.address,
+            to: batchSender.address,
+            deploy: true,
+            success: true,
+        });
+        // ============================================================ //
+        // Deploy Coin on Func
+        // ============================================================ //
+        // Create wallet for batch sender
+        const wallet = await token.getGetWalletAddress(batchSender.address);
+        batchSenderWallet = blockchain.openContract(await JettonDefaultWallet.fromAddress(wallet));
 
-//         console.log(`Jetton - ${token.address}`);
+        console.log(`Jetton - ${token.address}`);
         
-//         console.log(`batchSender - ${batchSender.address}`);
+        console.log(`batchSender - ${batchSender.address}`);
 
-//         console.log(`batchSenderWallet - ${batchSenderWallet.address}`);
-//         console.log(`batchSender - ${batchSender.address}`);
+        console.log(`batchSenderWallet - ${batchSenderWallet.address}`);
+        console.log(`batchSender - ${batchSender.address}`);
 
-//     });
+    });
 
 
-//     it('should send Jettons', async () => {
-//         const Senders = 4;
-//         let send_sum = 0;
-//         const senders_array: {[id: string]: {
-//             $$type:  'TokenSendInfo',
-//             recipient: SandboxContract<TreasuryContract>,
-//             value: BigInt
-//         }} = {}
+    it('should send Jettons', async () => {
+        const Senders = 4;
+        let send_sum = 0;
+        const senders_array: {[id: string]: {
+            $$type:  'TokenSendInfo',
+            recipient: SandboxContract<TreasuryContract>,
+            value: BigInt
+        }} = {}
         
-//         let message_dict = Dictionary.empty(Dictionary.Keys.BigUint(256), dictValueParserTokenSendInfo())
-//         for (let i = 0; i < Senders; i++) {
-//             const sender = await blockchain.treasury('sender' + i, {
-//                 balance: 0n
-//             });
-//             const send_value = getRandomInt(100) + 1
-//             senders_array[i] = { 
-//                 $$type: 'TokenSendInfo',
-//                 recipient: sender,
-//                 value: toNano(send_value),
-//             }
-//             message_dict.set(BigInt(i), { 
-//                 $$type: 'TokenSendInfo',
-//                 recipient: sender.address,
-//                 value: toNano(send_value),
-//             })
-//             send_sum += send_value;
-//         }
+        let message_dict = Dictionary.empty(Dictionary.Keys.BigUint(256), dictValueParserTokenSendInfo())
+        for (let i = 0; i < Senders; i++) {
+            const sender = await blockchain.treasury('sender' + i, {
+                balance: 0n
+            });
+            const send_value = getRandomInt(100) + 1
+            senders_array[i] = { 
+                $$type: 'TokenSendInfo',
+                recipient: sender,
+                value: toNano(send_value),
+            }
+            message_dict.set(BigInt(i), { 
+                $$type: 'TokenSendInfo',
+                recipient: sender.address,
+                value: toNano(send_value),
+            })
+            send_sum += send_value;
+        }
 
-//         // const payload = await batchSender.getBuildTokenSendPayload(
-//         //     {
-//         //         $$type: "TokenSend",
-//         //         length: BigInt(Senders),
-//         //         tokenRoot: deployer.address,
-//         //         sendInfo: message_dict
-//         //     }
-//         // )
+        // const payload = await batchSender.getBuildTokenSendPayload(
+        //     {
+        //         $$type: "TokenSend",
+        //         length: BigInt(Senders),
+        //         tokenRoot: deployer.address,
+        //         sendInfo: message_dict
+        //     }
+        // )
 
-//         const payload = payload_body(
-//             deployer.address,
-//             BigInt(Senders),
-//             message_dict
-//         )
+        const payload = payload_body(
+            deployer.address,
+            BigInt(Senders),
+            message_dict
+        )
 
 
-//         console.log(payload);
+        console.log(payload);
         
 
-//         expect(payload).not.toBeUndefined();
+        expect(payload).not.toBeUndefined();
         
-//         const sender = await blockchain.treasury("sender");
-//         const initMintAmount = toNano(send_sum);
-//         const transferAmount = toNano(send_sum);
+        const sender = await blockchain.treasury("sender");
+        const initMintAmount = toNano(send_sum);
+        const transferAmount = toNano(send_sum);
 
 
-//         console.log(`transferAmount - ${transferAmount}`);
-//         console.log(`initMintAmount - ${initMintAmount}`);
+        console.log(`transferAmount - ${transferAmount}`);
+        console.log(`initMintAmount - ${initMintAmount}`);
         
-//         const mintMessage: Mint = {
-//             $$type: "Mint",
-//             amount: initMintAmount,
-//             receiver: sender.address,
-//         };
-//         const mintResult = await token.send(
-//             deployer.getSender(), 
-//             { value:  toNano('0.25')}, 
-//             mintMessage
-//             );
+        const mintMessage: Mint = {
+            $$type: "Mint",
+            amount: initMintAmount,
+            receiver: sender.address,
+        };
+        const mintResult = await token.send(
+            deployer.getSender(), 
+            { value:  toNano('0.25')}, 
+            mintMessage
+            );
         
-//         // console.log(mintResult);
+        // console.log(mintResult);
         
-//         // mintResult.transactions.forEach((trans) => {
-//         //     //@ts-ignore
-//         //     if (trans.description.aborted == true){
-//         //         console.log(trans.vmLogs);
-//         //     }
-//         // })
+        // mintResult.transactions.forEach((trans) => {
+        //     //@ts-ignore
+        //     if (trans.description.aborted == true){
+        //         console.log(trans.vmLogs);
+        //     }
+        // })
 
-//         const senderWalletAddress = await token.getGetWalletAddress(sender.address);
-//         const senderWallet = blockchain.openContract(JettonDefaultWallet.fromAddress(senderWalletAddress));
-//         //const receiverWalletDataBeforeTransfer = await batchSenderWallet.getGetWalletData();
-//         const senderWalletDataBeforeTransfer = await senderWallet.getGetWalletData();
-//         console.log(`senderWalletAddress Balance BEFORE = ${senderWalletDataBeforeTransfer.balance}`);
+        const senderWalletAddress = await token.getGetWalletAddress(sender.address);
+        const senderWallet = blockchain.openContract(JettonDefaultWallet.fromAddress(senderWalletAddress));
+        //const receiverWalletDataBeforeTransfer = await batchSenderWallet.getGetWalletData();
+        const senderWalletDataBeforeTransfer = await senderWallet.getGetWalletData();
+        console.log(`senderWalletAddress Balance BEFORE = ${senderWalletDataBeforeTransfer.balance}`);
         
-//         //console.log(`batchSenderWallet Balance BEFORE = ${receiverWalletDataBeforeTransfer.balance}`);
-//         // Transfer tokens from sender's wallet to receiver's wallet // 0xf8a7ea5
-//         const transferMessage: TokenTransfer = {
-//             $$type: "TokenTransfer",
-//             queryId: 0n,
-//             amount: transferAmount,
-//             destination: batchSender.address,
-//             response_destination: sender.address,
-//             custom_payload: null,
-//             forward_ton_amount: toNano("0.09") * BigInt(Senders) + toNano('0.02') + (toNano("0.0086") * BigInt(Senders)),
-//             forward_payload: payload,
-//         };
+        //console.log(`batchSenderWallet Balance BEFORE = ${receiverWalletDataBeforeTransfer.balance}`);
+        // Transfer tokens from sender's wallet to receiver's wallet // 0xf8a7ea5
+        const transferMessage: TokenTransfer = {
+            $$type: "TokenTransfer",
+            queryId: 0n,
+            amount: transferAmount,
+            destination: batchSender.address,
+            response_destination: sender.address,
+            custom_payload: null,
+            forward_ton_amount: toNano("0.09") * BigInt(Senders) + toNano('0.02') + (toNano("0.0086") * BigInt(Senders)),
+            forward_payload: payload,
+        };
 
-//         const buidler = new Builder()
-//         storeTokenTransfer(transferMessage)(buidler)
+        const buidler = new Builder()
+        storeTokenTransfer(transferMessage)(buidler)
         
-//         const transferResult = await senderWallet.send
-//         (
-//             sender.getSender(), 
-//             { value: toNano("0.1") * BigInt(Senders) + toNano(1) + toNano('1000') }, 
-//             transferMessage, 
-//             true
-//         );
+        const transferResult = await senderWallet.send
+        (
+            sender.getSender(), 
+            { value: toNano("0.1") * BigInt(Senders) + toNano(1) + toNano('1000') }, 
+            transferMessage, 
+            true
+        );
 
-//         expect(transferResult.transactions).toHaveTransaction({
-//             from: sender.address,
-//             to: senderWallet.address,
-//             success: true,
-//         });
+        expect(transferResult.transactions).toHaveTransaction({
+            from: sender.address,
+            to: senderWallet.address,
+            success: true,
+        });
         
-//         transferResult.transactions.forEach((trans) => {
-//             //@ts-ignore
-//             if (trans.description.aborted == true){
-//                 console.log(trans.vmLogs);
-//             }
-//         })
-//         //printTransactionFees(transferResult.transactions);
+        transferResult.transactions.forEach((trans) => {
+            //@ts-ignore
+            if (trans.description.aborted == true){
+                console.log(trans.vmLogs);
+            }
+        })
+        //printTransactionFees(transferResult.transactions);
 
 
-//         for (let i = 0; i < Senders; i++) {
-//                     const recipientWalletAddress = await token.getGetWalletAddress(senders_array[i].recipient.address);
-//                     const recipientWallet = blockchain.openContract(JettonDefaultWallet.fromAddress(recipientWalletAddress));
-//                     const balance = (await recipientWallet.getGetWalletData()).balance
-//                     console.log(`Wallet ${i} (${recipientWalletAddress}) - ${balance} JETTONS`);
-//                     //expect(balance).toBe(senders_array[i].value)
-//                 }
+        for (let i = 0; i < Senders; i++) {
+                    const recipientWalletAddress = await token.getGetWalletAddress(senders_array[i].recipient.address);
+                    const recipientWallet = blockchain.openContract(JettonDefaultWallet.fromAddress(recipientWalletAddress));
+                    const balance = (await recipientWallet.getGetWalletData()).balance
+                    console.log(`Wallet ${i} (${recipientWalletAddress}) - ${balance} JETTONS`);
+                    //expect(balance).toBe(senders_array[i].value)
+                }
 
-//         const senderWalletDataAfterTransfer = await senderWallet.getGetWalletData();
-//         const receiverWalletDataAfterTransfer = await batchSenderWallet.getGetWalletData();
-
-
-//         console.log(`senderWalletDataAfterTransfer = ${senderWalletDataAfterTransfer.balance}`);
-//         console.log(`batchSenderWallet Balance = ${receiverWalletDataAfterTransfer.balance}`);
-
-//         // expect(senderWalletDataAfterTransfer.balance).toEqual(initMintAmount - transferAmount); // check that the sender transferred the right amount of tokens
-//         // expect(receiverWalletDataAfterTransfer.balance).toEqual(transferAmount);
-
-//     });
+        const senderWalletDataAfterTransfer = await senderWallet.getGetWalletData();
+        const receiverWalletDataAfterTransfer = await batchSenderWallet.getGetWalletData();
 
 
-// });
+        console.log(`senderWalletDataAfterTransfer = ${senderWalletDataAfterTransfer.balance}`);
+        console.log(`batchSenderWallet Balance = ${receiverWalletDataAfterTransfer.balance}`);
+
+        // expect(senderWalletDataAfterTransfer.balance).toEqual(initMintAmount - transferAmount); // check that the sender transferred the right amount of tokens
+        // expect(receiverWalletDataAfterTransfer.balance).toEqual(transferAmount);
+
+    });
+
+
+});

@@ -41,14 +41,14 @@ describe('Multisig', () => {
         multisig = blockchain.openContract(await SafeDeployerContract.fromInit(
             deployer.address,
             toNano("0.0001"),
-            toNano(1)
+            toNano(0.1)
         ));
 
 
         const deployResult = await multisig.send(
             deployer.getSender(),
             {
-                value: toNano('0.5'),
+                value: toNano('0.15'),
             },
             {
                 $$type: 'Deploy',
@@ -124,7 +124,7 @@ describe('Multisig', () => {
         // the check is done inside beforeEach
         // blockchain and multisig are ready to use
         // let operations = Dictionary.empty<number, SafeOperation>();
-        const deploySendResultawait = await multisig.send(deployer.getSender(), { value: toNano(1.001) }, "Deploy new Safe");
+        const deploySendResultawait = await multisig.send(deployer.getSender(), { value: toNano(0.15) }, "Deploy new Safe");
         
         multisigSafe = blockchain.openContract(await SafeContract.fromInit(
             deployer.getSender().address,
@@ -139,7 +139,7 @@ describe('Multisig', () => {
         });
 
         const safeParameters = await multisigSafe.getParameters()
-        expect(safeParameters.requestPrice).toEqual(toNano(1))
+        expect(safeParameters.requestPrice).toEqual(toNano(0.1))
     });
     
     it('should update owners', async () => {        

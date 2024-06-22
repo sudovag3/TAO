@@ -1,5 +1,5 @@
 import "@stdlib/deploy";
-import "@stdlib/ownable";
+import "./traits/whitelistable";
 
 
 const SEND_JETTON_COST: Int = ton("0.05");
@@ -8,19 +8,19 @@ const CLAIM_COST: Int = ton("0.08");
 
 const TON_DECIMALS: Int = 9;
 
-const LAUNCHPAD_VALUE_LESS_THEN_MINCAP: Int = 3000;
-const LAUNCHPAD_VALUE_GREATER_THEN_MAXCAP: Int = 3001;
+const LAUNCHPAD_VALUE_LESS_THEN_MIN_PURCHASE: Int = 3000;
+const LAUNCHPAD_VALUE_GREATER_THEN_MAX_PURCHASE: Int = 3001;
 const LAUNCHPAD_SALE_NOT_STARTED_YET: Int = 3002;
 const LAUNCHPAD_SALE_ENDED: Int = 3003;
 const LAUNCHPAD_CLAIM_NOT_STARTED_YET: Int = 3004;
 const LAUNCHPAD_GAS_TOO_SMALL: Int = 3005;
 const LAUNCHPAD_USER_NOT_INVEST: Int = 3006;
 const LAUNCHPAD_WALLET_NOT_SET: Int = 3007;
+const LAUNCHPAD_MAX_CAP_REACHED: Int = 3008;
 
 
 message TokenBuy {
     queryId: Int as uint64;
-    amount: Int as coins;
 }
 
 message Claim {
@@ -43,6 +43,8 @@ struct TokenPrice {
 struct LaunchpadParams {
     minCap: Int as coins;
     maxCap: Int as coins;
+    minPurchase: Int as coins;
+    maxPurchase: Int as coins;
     saleStart: Int;
     saleEnd: Int;
     tokenMaster: Address;
@@ -50,7 +52,7 @@ struct LaunchpadParams {
     tokenDecimals: Int;
 }
 
-contract Launchpad with Deployable, Ownable, OwnableTransferable {
+contract Launchpad with Deployable, WhiteListable {
     
     params: LaunchpadParams;
     totalUsers: Int = 0;
@@ -58,18 +60,24 @@ contract Launchpad with Deployable, Ownable, OwnableTransferable {
     tokenWallet: Address;
     users: map<Address, Int as uint256>;
     owner: Address;
+    whiteList: map<Address, Bool>;
+    whiteListEnable: Bool;
 
-    init(params: LaunchpadParams, owner: Address) {
+    init(params: LaunchpadParams, owner: Address, whiteListable: Bool) {
         self.params = params;
         self.owner = owner;
         self.tokenWallet = newAddress(0, 0);
+        self.whiteListEnable = whiteListable;
     }
 
     receive(msg: TokenBuy) {
         let ctx: Context = context();
 
-        nativeThrowUnless(LAUNCHPAD_VALUE_LESS_THEN_MINCAP, ctx.value >= self.params.minCap);
-        nativeThrowUnless(LAUNCHPAD_VALUE_GREATER_THEN_MAXCAP, ctx.value <= self.params.maxCap);
+        self.requireInWhiteList(ctx.sender);
+
+        nativeThrowUnless(LAUNCHPAD_MAX_CAP_REACHED, self.totalRaised < self.params.maxCap);
+        nativeThrowUnless(LAUNCHPAD_VALUE_LESS_THEN_MIN_PURCHASE, ctx.value >= self.params.minPurchase);
+        nativeThrowUnless(LAUNCHPAD_VALUE_GREATER_THEN_MAX_PURCHASE, ctx.value <= self.params.maxPurchase);
         nativeThrowUnless(LAUNCHPAD_SALE_NOT_STARTED_YET, self.isStarted());
         nativeThrowUnless(LAUNCHPAD_SALE_ENDED, !self.isEnded());
           
@@ -84,7 +92,10 @@ contract Launchpad with Deployable, Ownable, OwnableTransferable {
         if (userInvestAlready != null) {
             investAmount = investAmount + userInvestAlready!!;
         }
-
+        
+        self.totalUsers = self.totalUsers + 1;
+        self.totalRaised = self.totalRaised + ctx.value;
+        
         self.users.set(ctx.sender, investAmount);
     }
     
@@ -115,6 +126,8 @@ contract Launchpad with Deployable, Ownable, OwnableTransferable {
 
     receive(msg: Claim) {
         let ctx: Context = context();
+
+        self.requireInWhiteList(ctx.sender);
 
         nativeThrowUnless(LAUNCHPAD_CLAIM_NOT_STARTED_YET, self.isEnded());
         nativeThrowUnless(LAUNCHPAD_GAS_TOO_SMALL, ctx.value >= CLAIM_COST);
@@ -155,7 +168,19 @@ contract Launchpad with Deployable, Ownable, OwnableTransferable {
     }
 
     get fun isEnded(): Bool {
-        return now() < self.params.saleEnd;
+        return now() > self.params.saleEnd;
+    }
+
+    get fun totalRaised(): Int {
+        return self.totalRaised;
+    }
+
+    get fun usersCount(): Int {
+        return self.totalUsers;
+    }
+
+    get fun userInvest(target: Address): Int? {
+        return self.users.get(target);
     }
 
 }
